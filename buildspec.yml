@@ -5,11 +5,11 @@ phases:
       - echo Logging in to Amazon ECR....
       - aws --version
       - aws ecr get-login-password --region us-east-1 | docker login --username $AWS_USERNAME --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-      - REPOSITORY_URI=085579403971.dkr.ecr.us-east-1.amazonaws.com/golang-pipeline-aws
-      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
   build:
     commands:
       - echo Build started on `date`
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AWS_REPOSITORY_NAME
+      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
       - echo Building the Docker image...
       - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
@@ -24,7 +24,6 @@ phases:
       - printf '[{"name":"%s","imageUri":"%s"}]' $DOCKER_CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
       - echo $DOCKER_CONTAINER_NAME
       - echo printing imagedefinitions.json
-      - cat imagedefinitions.json
 artifacts:
   files:
     - imagedefinitions.json
