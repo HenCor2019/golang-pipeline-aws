@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/spf13/cast"
 
 	"github.com/HenCor2019/task-go/api/common/responses"
@@ -32,6 +33,7 @@ func New(
 
 func (api *API) Start(app *fiber.App) error {
 	app.Use(recover.New())
+	godotenv.Load()
 	v1 := app.Group("api/v1")
 
 	v1.Get("healthcheck", func(c *fiber.Ctx) error {
