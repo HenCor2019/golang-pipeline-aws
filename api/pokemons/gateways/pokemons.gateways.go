@@ -1,7 +1,6 @@
 package PokemonsGateways
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"io"
 	"log"
@@ -16,10 +15,7 @@ import (
 
 func Fetch(ids []int, wg *sync.WaitGroup) ([]models.Pokemon, error) {
 	pokemons := []models.Pokemon{}
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
+	client := &http.Client{}
 	for _, pokemonId := range ids {
 		wg.Add(1)
 		go func(id int) {

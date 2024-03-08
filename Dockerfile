@@ -1,6 +1,7 @@
 FROM golang:1.19-alpine AS base
-ARG DEBUG_SERVER_PORT
 ARG PORT
+
+RUN apk add --no-cache git
 
 ENV DIR $GOPATH/app/api
 WORKDIR $DIR
@@ -38,9 +39,11 @@ EXPOSE ${PORT}
 
 CMD ["./main"]
 
-FROM scratch
+FROM gcr.io/distroless/static-debian12:nonroot AS final
+USER nonroot:nonroot
 
 COPY . $DIR/
 
-COPY --from=build /go/bin/binary /go/bin/binary
+COPY --from=build --chown=nonroot:nonroot /go/bin/binary /go/bin/binary
+
 ENTRYPOINT ["/go/bin/binary"]
