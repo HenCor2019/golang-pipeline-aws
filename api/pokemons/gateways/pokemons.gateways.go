@@ -1,6 +1,7 @@
 package PokemonsGateways
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"io"
 	"log"
@@ -15,19 +16,27 @@ import (
 
 func Fetch(ids []int, wg *sync.WaitGroup) ([]models.Pokemon, error) {
 	pokemons := []models.Pokemon{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
 	for _, pokemonId := range ids {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
 			init := time.Now()
-			resp, err := http.Get("https://pokeapi.co/api/v2/pokemon/" + strconv.Itoa(id))
+			var uri = "https://pokeapi.co/api/v2/pokemon/" + strconv.Itoa(id)
+			print(uri)
+			resp, err := client.Get(uri)
 			if err != nil {
 				log.Println("Cannot fetch the request with id: ", id)
+				log.Println("error: ", err.Error())
 				return
 			}
 
 			if resp.Status != "200 OK" {
 				log.Println("Cannot fetch the request with id: ", id)
+				log.Println("error: ", err.Error())
 				return
 			}
 
@@ -37,6 +46,7 @@ func Fetch(ids []int, wg *sync.WaitGroup) ([]models.Pokemon, error) {
 			err = json.Unmarshal(bodyBytes, &pokemonStruct)
 			if err != nil {
 				log.Println("Cannot fetch the request with id: ", id)
+				log.Println("error: ", err.Error())
 				return
 			}
 
